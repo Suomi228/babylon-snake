@@ -16,6 +16,7 @@ import {
   HavokPlugin,
   PhysicsShapeType,
   PhysicsAggregate,
+  Quaternion,
 } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { PhysicsBody } from "@babylonjs/core";
@@ -42,6 +43,7 @@ class App {
       Vector3.Zero(),
       this.scene
     );
+    camera.setPosition(new Vector3(0, 1, 10));
     camera.attachControl(canvas, true);
     var light1: HemisphericLight = new HemisphericLight(
       "light1",
@@ -50,13 +52,33 @@ class App {
     );
 
     this.enablePhysic().then(() => {
-      const box1 = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, this.scene);
-      const box2 = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, this.scene);
-      const box3 = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, this.scene);
-      const box4 = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, this.scene);
-      var ground = MeshBuilder.CreateGround("ground",{ width: 10, height: 10 },this.scene);
+      const box1 = MeshBuilder.CreateBox(
+        "box",
+        { width: 1, height: 1 },
+        this.scene
+      );
+      const box2 = MeshBuilder.CreateBox(
+        "box",
+        { width: 1, height: 1 },
+        this.scene
+      );
+      const box3 = MeshBuilder.CreateBox(
+        "box",
+        { width: 1, height: 1 },
+        this.scene
+      );
+      const box4 = MeshBuilder.CreateBox(
+        "box",
+        { width: 1, height: 1 },
+        this.scene
+      );
+      var ground = MeshBuilder.CreateGround(
+        "ground",
+        { width: 10, height: 10 },
+        this.scene
+      );
       box1.position = new Vector3(0, 1, 0);
-      box2.position = new Vector3(1, 1, 0);
+      box2.position = new Vector3(1, 2, 0);
       box3.position = new Vector3(2, 1, 0);
       box4.position = new Vector3(3, 1, 0);
       let boxMaterialLightGreen = new StandardMaterial("material", this.scene);
@@ -67,6 +89,48 @@ class App {
       box2.material = boxMaterialDarkGreen;
       box3.material = boxMaterialLightGreen;
       box4.material = boxMaterialDarkGreen;
+      const box1Body = new PhysicsBody(
+        box1,
+        PhysicsMotionType.STATIC,
+        false,
+        this.scene
+      );
+      box1Body.setMassProperties({
+        mass: 1,
+        centerOfMass: new Vector3(0, 1, 0),
+        inertia: new Vector3(1, 1, 1),
+        inertiaOrientation: new Quaternion(0, 0, 0, 1),
+      });
+      const box2Body = new PhysicsBody(
+        box2,
+        PhysicsMotionType.DYNAMIC,
+        false,
+        this.scene
+      );
+      box2Body.setMassProperties({
+        mass: 3,
+        centerOfMass: new Vector3(1, 0, 0),
+        inertia: new Vector3(1, 1, 1),
+        inertiaOrientation: new Quaternion(0, 0, 0, 1),
+      });
+      const constraint = new DistanceConstraint(
+        1, // max distance between the two bodies
+        this.scene
+      );
+      
+      box1Body.addConstraint(box2Body, constraint);
+      var groundBody = new PhysicsBody(
+        ground,
+        PhysicsMotionType.STATIC,
+        true,
+        this.scene
+      );
+      groundBody.setMassProperties({
+        centerOfMass: new Vector3(0, 0, 0),
+        mass: 1,
+        inertia: new Vector3(1, 1, 1),
+        inertiaOrientation: Quaternion.Identity(),
+      });
     });
 
     engine.runRenderLoop(() => {
