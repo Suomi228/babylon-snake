@@ -78,6 +78,11 @@ class App {
         { width: 1, height: 1 },
         this.scene
       );
+      var ground = MeshBuilder.CreateGround(
+        "ground",
+        { width: 10, height: 10 },
+        this.scene
+      );
       box1.metadata = {
         id: 1,
       };
@@ -103,52 +108,12 @@ class App {
       box2.material = boxMaterialDarkGreen;
       box3.material = boxMaterialLightGreen;
       box4.material = boxMaterialDarkGreen;
-      const box1Body = new PhysicsBody(
-        box1,
-        PhysicsMotionType.DYNAMIC,
-        false,
-        this.scene
-      );
-      box1Body.setMassProperties({
-        mass: 1,
-        centerOfMass: new Vector3(0, 1, 0),
-        inertia: new Vector3(1, 1, 1),
-        inertiaOrientation: new Quaternion(0, 0, 0, 1),
-      });
-      const box2Body = new PhysicsBody(
-        box2,
-        PhysicsMotionType.DYNAMIC,
-        false,
-        this.scene
-      );
-      box2Body.setMassProperties({
-        mass: 1,
-        centerOfMass: new Vector3(1, 0, 0),
-        inertia: new Vector3(1, 1, 1),
-        inertiaOrientation: new Quaternion(0, 0, 0, 1),
-      });
-      const box3Body = new PhysicsBody(
-        box3,
-        PhysicsMotionType.DYNAMIC,
-        false,
-        this.scene
-      );
-      const box4Body = new PhysicsBody(
-        box4,
-        PhysicsMotionType.DYNAMIC,
-        false,
-        this.scene
-      );
-      var boxShape = new PhysicsShapeBox(
-        new Vector3(0, 0, 0),
-        Quaternion.Identity(),
-        new Vector3(1, 1, 0),
-        this.scene
-      );
-      box4Body.shape = boxShape;
-      box3Body.shape = boxShape;
-      box2Body.shape = boxShape;
-      box1Body.shape = boxShape;
+
+      const box1Body = createPhysicBox(box1, this.scene);
+      const box2Body = createPhysicBox(box2, this.scene);
+      const box3Body = createPhysicBox(box3, this.scene);
+      const box4Body = createPhysicBox(box4, this.scene);
+      
       const constraint = new DistanceConstraint(
         1.2, // max distance between the two bodies
         this.scene
@@ -157,11 +122,8 @@ class App {
       box1Body.addConstraint(box2Body, constraint);
       box2Body.addConstraint(box3Body, constraint);
       box3Body.addConstraint(box4Body, constraint);
-      var ground = MeshBuilder.CreateGround(
-        "ground",
-        { width: 10, height: 10 },
-        this.scene
-      );
+      box4Body.addConstraint(box1Body, constraint); 
+   
       var groundShape = new PhysicsShapeBox(
         new Vector3(0, 0, 0),
         Quaternion.Identity(),
@@ -185,7 +147,7 @@ class App {
         console.log(event);
       });
       box4.addBehavior(pointerDragBehavior);
-      WorldBuild(ground, groundShape, this.scene);
+      worldBuild(ground, groundShape, this.scene);
     });
 
     engine.runRenderLoop(() => {
@@ -201,11 +163,33 @@ class App {
       new HavokPlugin(true, havok)
     );
   }
+  
 }
 
 new App();
-
-const WorldBuild = function (ground, groundShape, scene) {
+const createPhysicBox = function (box, scene){
+  const boxBody = new PhysicsBody(
+    box,
+    PhysicsMotionType.DYNAMIC,
+    false,
+    scene
+  );
+  var boxShape = new PhysicsShapeBox(
+    new Vector3(0, 0, 0),
+    Quaternion.Identity(),
+    new Vector3(1, 1, 0),
+    scene
+  );
+  boxBody.setMassProperties({
+    mass: 1,
+    centerOfMass: new Vector3(1, 0, 0),
+    inertia: new Vector3(1, 1, 1),
+    inertiaOrientation: new Quaternion(0, 0, 0, 1),
+  });
+  boxBody.shape = boxShape;
+  return boxBody;
+}
+const worldBuild = function (ground, groundShape, scene) {
   var groundBody = new PhysicsBody(
     ground,
     PhysicsMotionType.STATIC,
