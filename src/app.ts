@@ -18,15 +18,18 @@ import {
   PhysicsAggregate,
   Quaternion,
   PhysicsShapeBox,
+  PointerDragBehavior,
+  SixDofDragBehavior,
 } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { PhysicsBody } from "@babylonjs/core";
+import { Inspector } from '@babylonjs/inspector';
 
 class App {
   scene: Scene;
 
+  
   constructor() {
-    // create the canvas html element and attach it to the webpage
     var canvas = document.createElement("canvas");
     canvas.style.width = "100%";
     canvas.style.height = "100%";
@@ -36,6 +39,7 @@ class App {
     // initialize babylon scene and engine
     var engine = new Engine(canvas, true);
     this.scene = new Scene(engine);
+
     var camera: ArcRotateCamera = new ArcRotateCamera(
       "Camera",
       Math.PI / 2,
@@ -46,6 +50,7 @@ class App {
     );
     camera.setPosition(new Vector3(0, 1, 10));
     camera.attachControl(canvas, true);
+    Inspector.Show(this.scene, {});
     var light1: HemisphericLight = new HemisphericLight(
       "light1",
       new Vector3(1, 1, 0),
@@ -74,18 +79,18 @@ class App {
         this.scene
       );
       box1.metadata = {
-        id: 1
-      }
+        id: 1,
+      };
       box2.metadata = {
-        id: 2
-      }
+        id: 2,
+      };
       box3.metadata = {
-        id: 3
-      }
+        id: 3,
+      };
       box4.metadata = {
-        id: 4
-      }
-      
+        id: 4,
+      };
+
       box1.position = new Vector3(0, 1, 0);
       box2.position = new Vector3(1, 2, 0);
       box3.position = new Vector3(2, 1, 0);
@@ -135,7 +140,7 @@ class App {
         this.scene
       );
       const constraint = new DistanceConstraint(
-        1, // max distance between the two bodies
+        1.2, // max distance between the two bodies
         this.scene
       );
 
@@ -153,6 +158,23 @@ class App {
         new Vector3(1, 0.1, 1),
         this.scene
       );
+      var pointerDragBehavior = new PointerDragBehavior({
+        dragAxis: new Vector3(1, 0, 0),
+      });
+      pointerDragBehavior.useObjectOrientationForDragging = false;
+      pointerDragBehavior.onDragStartObservable.add((event) => {
+        console.log("dragStart");
+        console.log(event);
+      });
+      pointerDragBehavior.onDragObservable.add((event) => {
+        console.log("drag");
+        console.log(event);
+      });
+      pointerDragBehavior.onDragEndObservable.add((event) => {
+        console.log("dragEnd");
+        console.log(event);
+      });
+      box4.addBehavior(pointerDragBehavior);
       WorldBuild(ground, groundShape, this.scene);
     });
 
@@ -160,7 +182,6 @@ class App {
       this.scene.render();
     });
 
-    
   }
 
   async enablePhysic(): Promise<void> {
@@ -171,6 +192,7 @@ class App {
     );
   }
 }
+
 new App();
 
 const WorldBuild = function (ground, groundShape, scene) {
