@@ -105,7 +105,7 @@ class App {
       box4.material = boxMaterialDarkGreen;
       const box1Body = new PhysicsBody(
         box1,
-        PhysicsMotionType.STATIC,
+        PhysicsMotionType.DYNAMIC,
         false,
         this.scene
       );
@@ -139,6 +139,16 @@ class App {
         false,
         this.scene
       );
+      var boxShape = new PhysicsShapeBox(
+        new Vector3(0, 0, 0),
+        Quaternion.Identity(),
+        new Vector3(1, 1, 0),
+        this.scene
+      );
+      box4Body.shape = boxShape;
+      box3Body.shape = boxShape;
+      box2Body.shape = boxShape;
+      box1Body.shape = boxShape;
       const constraint = new DistanceConstraint(
         1.2, // max distance between the two bodies
         this.scene
@@ -155,7 +165,7 @@ class App {
       var groundShape = new PhysicsShapeBox(
         new Vector3(0, 0, 0),
         Quaternion.Identity(),
-        new Vector3(1, 0.1, 1),
+        new Vector3(10, 1, 10),
         this.scene
       );
       var pointerDragBehavior = new PointerDragBehavior({
