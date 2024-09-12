@@ -73,7 +73,19 @@ class App {
         { width: 1, height: 1 },
         this.scene
       );
-     
+      box1.metadata = {
+        id: 1
+      }
+      box2.metadata = {
+        id: 2
+      }
+      box3.metadata = {
+        id: 3
+      }
+      box4.metadata = {
+        id: 4
+      }
+      
       box1.position = new Vector3(0, 1, 0);
       box2.position = new Vector3(1, 2, 0);
       box3.position = new Vector3(2, 1, 0);
@@ -147,6 +159,8 @@ class App {
     engine.runRenderLoop(() => {
       this.scene.render();
     });
+
+    
   }
 
   async enablePhysic(): Promise<void> {
