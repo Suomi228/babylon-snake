@@ -61,43 +61,16 @@ class App {
     );
 
     this.enablePhysic().then(() => {
-      const box1 = MeshBuilder.CreateBox(
-        "box",
-        { width: 1, height: 1 },
-        this.scene
-      );
-      const box2 = MeshBuilder.CreateBox(
-        "box",
-        { width: 1, height: 1 },
-        this.scene
-      );
-      const box3 = MeshBuilder.CreateBox(
-        "box",
-        { width: 1, height: 1 },
-        this.scene
-      );
-      const box4 = MeshBuilder.CreateBox(
-        "box",
-        { width: 1, height: 1 },
-        this.scene
-      );
+      const box1 = createBox(1,this.scene)
+      const box2 = createBox(2,this.scene)
+      const box3 = createBox(3,this.scene)
+      const box4 = createBox(4,this.scene)
       var ground = MeshBuilder.CreateGround(
         "ground",
         { width: 30, height: 20 },
         this.scene
       );
-      box1.metadata = {
-        id: 1,
-      };
-      box2.metadata = {
-        id: 2,
-      };
-      box3.metadata = {
-        id: 3,
-      };
-      box4.metadata = {
-        id: 4,
-      };
+
 
       box1.position = new Vector3(0, 1, 0);
       box2.position = new Vector3(1, 2, 0);
@@ -228,8 +201,8 @@ class App {
       });
 
       var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-      let colorButton = createBox(1, "right")
-      
+      let colorButton = createButton(1, "right");
+
       colorButton.onPointerUpObservable.add(function () {
         if (clickedBox == null) {
           alert("Please select box");
@@ -255,7 +228,7 @@ class App {
 
       advancedTexture.addControl(colorButton);
 
-      let color2Button = createBox(1, "left")
+      let color2Button = createButton(1, "left");
       color2Button.onPointerUpObservable.add(function () {
         if (clickedBox == null) {
           alert("Please select box");
@@ -281,13 +254,9 @@ class App {
 
       advancedTexture.addControl(color2Button);
 
-      var textblock = new GUI.TextBlock();
-      textblock.height = "150px";
-      textblock.fontSize = 50;
-      textblock.text = "This block";
-      advancedTexture.addControl(textblock);
-      textblock.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
 
+      var textblock = createTextBlock()
+      advancedTexture.addControl(textblock);
       worldBuild(ground, groundShape, this.scene);
     });
 
@@ -306,7 +275,29 @@ class App {
 }
 
 new App();
-const createBox = function (id, allignment) {
+
+const createBox = function(id: number, scene: Scene){
+  const box = MeshBuilder.CreateBox(
+    "box",
+    { width: 1, height: 1 },
+    scene
+  );
+  box.metadata = {
+    id: id,
+  };
+  return box;
+}
+
+const createTextBlock = function () {
+  var textblock = new GUI.TextBlock();
+  textblock.height = "150px";
+  textblock.fontSize = 50;
+  textblock.text = "This block";
+  textblock.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+  return textblock;
+};
+
+const createButton = function (id:number, allignment:string) {
   var colorButton = GUI.Button.CreateSimpleButton(`${id}`, "change box color");
   colorButton.width = "150px";
   colorButton.height = "40px";
