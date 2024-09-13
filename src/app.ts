@@ -155,6 +155,7 @@ class App {
       });
 
       let clickedBox;
+      let boxId;
       this.scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.pickInfo.pickedMesh) {
           case box4:
@@ -169,6 +170,8 @@ class App {
             );
             addBoxPrestepAndBehavior(box4Body, box4, pointerDragBehavior);
             clickedBox = pointerInfo.pickInfo.pickedMesh;
+            boxId = clickedBox.metadata.id;
+            textblock.text = `${boxId}`;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
           case box3:
@@ -183,6 +186,8 @@ class App {
             );
             addBoxPrestepAndBehavior(box3Body, box3, pointerDragBehavior);
             clickedBox = pointerInfo.pickInfo.pickedMesh;
+            boxId = clickedBox.metadata.id;
+            textblock.text = `${boxId}`;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
           case box2:
@@ -197,6 +202,8 @@ class App {
             );
             addBoxPrestepAndBehavior(box2Body, box2, pointerDragBehavior);
             clickedBox = pointerInfo.pickInfo.pickedMesh;
+            boxId = clickedBox.metadata.id;
+            textblock.text = `${boxId}`;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
           case box1:
@@ -211,20 +218,16 @@ class App {
             );
             addBoxPrestepAndBehavior(box1Body, box1, pointerDragBehavior);
             clickedBox = pointerInfo.pickInfo.pickedMesh;
+            boxId = clickedBox.metadata.id;
+            textblock.text = `${boxId}`;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
         }
       });
 
       var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
-      var button1 = GUI.Button.CreateSimpleButton("but1", "Click Me");
-      button1.width = "150px";
-      button1.height = "40px";
-      button1.color = "white";
-      button1.cornerRadius = 20;
-      button1.background = "green";
-      button1.onPointerUpObservable.add(function () {
+      let colorButton = createBox(1, "right")
+      colorButton.onPointerUpObservable.add(function () {
         if (clickedBox == null) {
           alert("Please select box");
         }
@@ -246,8 +249,15 @@ class App {
             break;
         }
       });
-      advancedTexture.addControl(button1);
-      button1.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+
+      advancedTexture.addControl(colorButton);
+
+      var textblock = new GUI.TextBlock();
+      textblock.height = "150px";
+      textblock.fontSize = 50;
+      textblock.text = "This block";
+      advancedTexture.addControl(textblock);
+      textblock.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
 
       worldBuild(ground, groundShape, this.scene);
     });
@@ -267,7 +277,26 @@ class App {
 }
 
 new App();
-
+const createBox = function (id, allignment) {
+  var colorButton = GUI.Button.CreateSimpleButton(`${id}`, "change box color");
+  colorButton.width = "150px";
+  colorButton.height = "40px";
+  colorButton.color = "white";
+  colorButton.cornerRadius = 20;
+  colorButton.background = "green";
+  switch (allignment) {
+    case "left":
+      colorButton.verticalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+      break;
+    case "right":
+      colorButton.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+      break;
+    default:
+      colorButton.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+      break;
+  }
+  return colorButton;
+};
 const addBoxPrestepAndBehavior = function (
   currentBoxBody,
   currentBox,
