@@ -20,15 +20,14 @@ import {
   PhysicsShapeBox,
   PointerDragBehavior,
   SixDofDragBehavior,
+  PhysicsPrestepType,
 } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { PhysicsBody } from "@babylonjs/core";
 import { Inspector } from '@babylonjs/inspector';
 
 class App {
-  scene: Scene;
-
-  
+  scene: Scene; 
   constructor() {
     var canvas = document.createElement("canvas");
     canvas.style.width = "100%";
@@ -80,7 +79,7 @@ class App {
       );
       var ground = MeshBuilder.CreateGround(
         "ground",
-        { width: 10, height: 10 },
+        { width: 30, height: 20 },
         this.scene
       );
       box1.metadata = {
@@ -115,25 +114,27 @@ class App {
       const box4Body = createPhysicBox(box4, this.scene);
       
       const constraint = new DistanceConstraint(
-        1.2, // max distance between the two bodies
+        1.15, // max distance between the two bodies
         this.scene
       );
 
       box1Body.addConstraint(box2Body, constraint);
       box2Body.addConstraint(box3Body, constraint);
       box3Body.addConstraint(box4Body, constraint);
-      box4Body.addConstraint(box1Body, constraint); 
-   
+
+
       var groundShape = new PhysicsShapeBox(
         new Vector3(0, 0, 0),
         Quaternion.Identity(),
-        new Vector3(10, 1, 10),
+        new Vector3(20, 1, 20),
         this.scene
       );
       var pointerDragBehavior = new PointerDragBehavior({
         dragAxis: new Vector3(1, 0, 0),
       });
+      
       pointerDragBehavior.useObjectOrientationForDragging = false;
+      
       pointerDragBehavior.onDragStartObservable.add((event) => {
         console.log("dragStart");
         console.log(event);
@@ -146,7 +147,9 @@ class App {
         console.log("dragEnd");
         console.log(event);
       });
+      box4Body.setPrestepType(PhysicsPrestepType.ACTION)
       box4.addBehavior(pointerDragBehavior);
+   
       worldBuild(ground, groundShape, this.scene);
     });
 
@@ -180,12 +183,14 @@ const createPhysicBox = function (box, scene){
     new Vector3(1, 1, 0),
     scene
   );
+  var boxMaterial = { friction: 0.5, restitution: 0.5 };
   boxBody.setMassProperties({
     mass: 1,
     centerOfMass: new Vector3(1, 0, 0),
     inertia: new Vector3(1, 1, 1),
     inertiaOrientation: new Quaternion(0, 0, 0, 1),
   });
+  boxShape.material = boxMaterial;
   boxBody.shape = boxShape;
   return boxBody;
 }
