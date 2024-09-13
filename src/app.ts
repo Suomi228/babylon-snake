@@ -61,25 +61,27 @@ class App {
     );
 
     this.enablePhysic().then(() => {
-      const box1 = createBox(1, this.scene, "green");
-      const box2 = createBox(2, this.scene, "lightGreen");
-      const box3 = createBox(3, this.scene, "green");
-      const box4 = createBox(4, this.scene, "lightGreen");
+      const box1 = createBox(1, this.scene, "green", 0,1);
+      const box2 = createBox(2, this.scene, "lightGreen",1,1);
+      const box3 = createBox(3, this.scene, "green",2,1);
+      const box4 = createBox(4, this.scene, "lightGreen",3,1);
       var ground = MeshBuilder.CreateGround(
         "ground",
         { width: 30, height: 20 },
         this.scene
       );
 
-      box1.position = new Vector3(0, 1, 0);
-      box2.position = new Vector3(1, 2, 0);
-      box3.position = new Vector3(2, 1, 0);
-      box4.position = new Vector3(3, 1, 0);
+      var groundShape = new PhysicsShapeBox(
+        new Vector3(0, 0, 0),
+        Quaternion.Identity(),
+        new Vector3(20, 1, 20),
+        this.scene
+      );
 
 
       let boxPickedRed = new StandardMaterial("material", this.scene);
       boxPickedRed.emissiveColor = new Color3(1, 0, 0);
-      
+
       let boxPickedDarkBlue = new StandardMaterial("material", this.scene);
       boxPickedDarkBlue.emissiveColor = new Color3(0, 0, 1);
 
@@ -97,12 +99,7 @@ class App {
       box2Body.addConstraint(box3Body, constraint);
       box3Body.addConstraint(box4Body, constraint);
 
-      var groundShape = new PhysicsShapeBox(
-        new Vector3(0, 0, 0),
-        Quaternion.Identity(),
-        new Vector3(20, 1, 20),
-        this.scene
-      );
+     
       var pointerDragBehavior = new PointerDragBehavior({
         dragAxis: new Vector3(1, 0, 0),
       });
@@ -197,9 +194,6 @@ class App {
       let colorButton = createButton(1, "right");
 
       colorButton.onPointerUpObservable.add(function () {
-        if (clickedBox == null) {
-          alert("Please select box");
-        }
         switch (clickedBox.metadata.id) {
           case 1:
             box1.material = boxPickedRed;
@@ -223,9 +217,6 @@ class App {
 
       let color2Button = createButton(1, "left");
       color2Button.onPointerUpObservable.add(function () {
-        if (clickedBox == null) {
-          alert("Please select box");
-        }
         switch (clickedBox.metadata.id) {
           case 1:
             box1.material = boxPickedDarkBlue;
@@ -268,7 +259,7 @@ class App {
 
 new App();
 
-const createBox = function (id: number, scene: Scene, color: string) {
+const createBox = function (id: number, scene: Scene, color: string, x: number, y: number) {
   const box = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, scene);
   box.metadata = {
     id: id,
@@ -278,6 +269,7 @@ const createBox = function (id: number, scene: Scene, color: string) {
   let boxMaterialDarkGreen = new StandardMaterial("material", scene);
   boxMaterialDarkGreen.emissiveColor = new Color3(0.2, 0.48, 0.32);
   box.material = color === "lightGreen"? boxMaterialLightGreen : boxMaterialDarkGreen;
+  box.position = new Vector3(x, y, 0);
   return box;
 };
 
