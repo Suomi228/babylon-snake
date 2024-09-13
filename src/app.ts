@@ -61,34 +61,27 @@ class App {
     );
 
     this.enablePhysic().then(() => {
-      const box1 = createBox(1,this.scene)
-      const box2 = createBox(2,this.scene)
-      const box3 = createBox(3,this.scene)
-      const box4 = createBox(4,this.scene)
+      const box1 = createBox(1, this.scene, "green");
+      const box2 = createBox(2, this.scene, "lightGreen");
+      const box3 = createBox(3, this.scene, "green");
+      const box4 = createBox(4, this.scene, "lightGreen");
       var ground = MeshBuilder.CreateGround(
         "ground",
         { width: 30, height: 20 },
         this.scene
       );
 
-
       box1.position = new Vector3(0, 1, 0);
       box2.position = new Vector3(1, 2, 0);
       box3.position = new Vector3(2, 1, 0);
       box4.position = new Vector3(3, 1, 0);
 
-      let boxMaterialLightGreen = new StandardMaterial("material", this.scene);
-      boxMaterialLightGreen.emissiveColor = new Color3(0.1, 0.8, 0);
-      let boxMaterialDarkGreen = new StandardMaterial("material", this.scene);
-      boxMaterialDarkGreen.emissiveColor = new Color3(0.2, 0.48, 0.32);
+
       let boxPickedRed = new StandardMaterial("material", this.scene);
       boxPickedRed.emissiveColor = new Color3(1, 0, 0);
+      
       let boxPickedDarkBlue = new StandardMaterial("material", this.scene);
       boxPickedDarkBlue.emissiveColor = new Color3(0, 0, 1);
-      box1.material = boxMaterialLightGreen;
-      box2.material = boxMaterialDarkGreen;
-      box3.material = boxMaterialLightGreen;
-      box4.material = boxMaterialDarkGreen;
 
       const box1Body = createPhysicBox(box1, this.scene);
       const box2Body = createPhysicBox(box2, this.scene);
@@ -254,8 +247,7 @@ class App {
 
       advancedTexture.addControl(color2Button);
 
-
-      var textblock = createTextBlock()
+      var textblock = createTextBlock();
       advancedTexture.addControl(textblock);
       worldBuild(ground, groundShape, this.scene);
     });
@@ -276,17 +268,18 @@ class App {
 
 new App();
 
-const createBox = function(id: number, scene: Scene){
-  const box = MeshBuilder.CreateBox(
-    "box",
-    { width: 1, height: 1 },
-    scene
-  );
+const createBox = function (id: number, scene: Scene, color: string) {
+  const box = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, scene);
   box.metadata = {
     id: id,
   };
+  let boxMaterialLightGreen = new StandardMaterial("material", scene);
+  boxMaterialLightGreen.emissiveColor = new Color3(0.1, 0.8, 0);
+  let boxMaterialDarkGreen = new StandardMaterial("material", scene);
+  boxMaterialDarkGreen.emissiveColor = new Color3(0.2, 0.48, 0.32);
+  box.material = color === "lightGreen"? boxMaterialLightGreen : boxMaterialDarkGreen;
   return box;
-}
+};
 
 const createTextBlock = function () {
   var textblock = new GUI.TextBlock();
@@ -297,7 +290,7 @@ const createTextBlock = function () {
   return textblock;
 };
 
-const createButton = function (id:number, allignment:string) {
+const createButton = function (id: number, allignment: string) {
   var colorButton = GUI.Button.CreateSimpleButton(`${id}`, "change box color");
   colorButton.width = "150px";
   colorButton.height = "40px";
