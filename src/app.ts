@@ -29,7 +29,7 @@ import HavokPhysics from "@babylonjs/havok";
 import { PhysicsBody } from "@babylonjs/core";
 import { Inspector } from "@babylonjs/inspector";
 import * as GUI from "@babylonjs/gui";
-import * as BABYLON from "@babylonjs/core";
+
 class App {
   scene: Scene;
   constructor() {
@@ -61,37 +61,40 @@ class App {
     );
 
     this.enablePhysic().then(() => {
+      //Создание мешей боксов, придача им цвета и расположения
       const box1 = createBox(1, this.scene, "green", 0,1);
       const box2 = createBox(2, this.scene, "lightGreen",1,1);
       const box3 = createBox(3, this.scene, "green",2,1);
       const box4 = createBox(4, this.scene, "lightGreen",3,1);
+
+      //Создание земли и её физической формы
       var ground = MeshBuilder.CreateGround(
         "ground",
         { width: 30, height: 20 },
         this.scene
       );
-
       var groundShape = new PhysicsShapeBox(
         new Vector3(0, 0, 0),
         Quaternion.Identity(),
         new Vector3(20, 1, 20),
         this.scene
       );
+      worldBuild(ground, groundShape, this.scene);
 
-
+      //Цвета для боксов при клике
       let boxPickedRed = new StandardMaterial("material", this.scene);
       boxPickedRed.emissiveColor = new Color3(1, 0, 0);
-
       let boxPickedDarkBlue = new StandardMaterial("material", this.scene);
       boxPickedDarkBlue.emissiveColor = new Color3(0, 0, 1);
 
+      //Установка физической формы для боксов и установка констрейнтов
       const box1Body = createPhysicBox(box1, this.scene);
       const box2Body = createPhysicBox(box2, this.scene);
       const box3Body = createPhysicBox(box3, this.scene);
       const box4Body = createPhysicBox(box4, this.scene);
 
       const constraint = new DistanceConstraint(
-        1.15, // max distance between the two bodies
+        1.15, 
         this.scene
       );
 
@@ -99,7 +102,8 @@ class App {
       box2Body.addConstraint(box3Body, constraint);
       box3Body.addConstraint(box4Body, constraint);
 
-     
+     //pointerDragBehavior
+
       var pointerDragBehavior = new PointerDragBehavior({
         dragAxis: new Vector3(1, 0, 0),
       });
@@ -121,6 +125,8 @@ class App {
 
       let clickedBox;
       let boxId;
+
+      //Установка поведения при клике на блок 
       this.scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.pickInfo.pickedMesh) {
           case box4:
@@ -190,6 +196,8 @@ class App {
         }
       });
 
+      
+      //Функции для установки цвета для боксов после клика кнопки
       var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
       let colorButton = createButton(1, "right");
 
@@ -235,12 +243,14 @@ class App {
             break;
         }
       });
-
       advancedTexture.addControl(color2Button);
 
+
+      //Текстовый блок отображает metadata
       var textblock = createTextBlock();
       advancedTexture.addControl(textblock);
-      worldBuild(ground, groundShape, this.scene);
+
+
     });
 
     engine.runRenderLoop(() => {
@@ -258,7 +268,7 @@ class App {
 }
 
 new App();
-
+//Функция для создания бокса
 const createBox = function (id: number, scene: Scene, color: string, x: number, y: number) {
   const box = MeshBuilder.CreateBox("box", { width: 1, height: 1 }, scene);
   box.metadata = {
@@ -272,7 +282,7 @@ const createBox = function (id: number, scene: Scene, color: string, x: number, 
   box.position = new Vector3(x, y, 0);
   return box;
 };
-
+//Функция для создания текстового поля
 const createTextBlock = function () {
   var textblock = new GUI.TextBlock();
   textblock.height = "150px";
@@ -281,7 +291,7 @@ const createTextBlock = function () {
   textblock.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
   return textblock;
 };
-
+//Функция для создания кнопки
 const createButton = function (id: number, allignment: string) {
   var colorButton = GUI.Button.CreateSimpleButton(`${id}`, "change box color");
   colorButton.width = "150px";
@@ -302,22 +312,25 @@ const createButton = function (id: number, allignment: string) {
   }
   return colorButton;
 };
+//Функции для добавления поведения при перетаскивании бокса
 const addBoxPrestepAndBehavior = function (
-  currentBoxBody,
-  currentBox,
-  pointerDragBehavior
+  currentBoxBody:PhysicsBody,
+  currentBox:Mesh,
+  pointerDragBehavior:PointerDragBehavior
 ) {
   currentBoxBody.setPrestepType(PhysicsPrestepType.ACTION);
   currentBox.addBehavior(pointerDragBehavior);
 };
+
+//Функции для удаления поведения при перетаскивании бокса
 const removeBoxPrestepAndBehavior = function (
-  currentBox1Body,
-  currentBox1,
-  currentBox2Body,
-  currentBox2,
-  currentBox3Body,
-  currentBox3,
-  pointerDragBehavior
+  currentBox1Body:PhysicsBody,
+  currentBox1:Mesh,
+  currentBox2Body:PhysicsBody,
+  currentBox2:Mesh,
+  currentBox3Body:PhysicsBody,
+  currentBox3:Mesh,
+  pointerDragBehavior:PointerDragBehavior
 ) {
   currentBox1Body.setPrestepType(PhysicsPrestepType.DISABLED);
   currentBox1.removeBehavior(pointerDragBehavior);
@@ -326,7 +339,8 @@ const removeBoxPrestepAndBehavior = function (
   currentBox3Body.setPrestepType(PhysicsPrestepType.DISABLED);
   currentBox3.removeBehavior(pointerDragBehavior);
 };
-const createPhysicBox = function (box, scene) {
+//Функция создания физичексого бокса
+const createPhysicBox = function (box:Mesh, scene:Scene) {
   const boxBody = new PhysicsBody(box, PhysicsMotionType.DYNAMIC, false, scene);
   var boxShape = new PhysicsShapeBox(
     new Vector3(0, 0, 0),
@@ -345,7 +359,8 @@ const createPhysicBox = function (box, scene) {
   boxBody.shape = boxShape;
   return boxBody;
 };
-const worldBuild = function (ground, groundShape, scene) {
+//Функция создания физической земли
+const worldBuild = function (ground:Mesh, groundShape:PhysicsShapeBox, scene:Scene) {
   var groundBody = new PhysicsBody(
     ground,
     PhysicsMotionType.STATIC,
