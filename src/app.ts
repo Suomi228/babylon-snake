@@ -108,6 +108,8 @@ class App {
       boxMaterialLightGreen.emissiveColor = new Color3(0.1, 0.8, 0);
       let boxMaterialDarkGreen = new StandardMaterial("material", this.scene);
       boxMaterialDarkGreen.emissiveColor = new Color3(0.2, 0.48, 0.32);
+      let boxPickedDarkGreen = new StandardMaterial("material", this.scene);
+      boxPickedDarkGreen.emissiveColor = new Color3(1, 0, 0);
       box1.material = boxMaterialLightGreen;
       box2.material = boxMaterialDarkGreen;
       box3.material = boxMaterialLightGreen;
@@ -166,6 +168,7 @@ class App {
               pointerDragBehavior
             );
             addBoxPrestepAndBehavior(box4Body, box4, pointerDragBehavior);
+            clickedBox = pointerInfo.pickInfo.pickedMesh;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
           case box3:
@@ -179,6 +182,7 @@ class App {
               pointerDragBehavior
             );
             addBoxPrestepAndBehavior(box3Body, box3, pointerDragBehavior);
+            clickedBox = pointerInfo.pickInfo.pickedMesh;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
           case box2:
@@ -192,6 +196,7 @@ class App {
               pointerDragBehavior
             );
             addBoxPrestepAndBehavior(box2Body, box2, pointerDragBehavior);
+            clickedBox = pointerInfo.pickInfo.pickedMesh;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
           case box1:
@@ -205,10 +210,45 @@ class App {
               pointerDragBehavior
             );
             addBoxPrestepAndBehavior(box1Body, box1, pointerDragBehavior);
+            clickedBox = pointerInfo.pickInfo.pickedMesh;
             console.log("clikced", pointerInfo.pickInfo.pickedMesh);
             break;
         }
       });
+
+      var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+      var button1 = GUI.Button.CreateSimpleButton("but1", "Click Me");
+      button1.width = "150px";
+      button1.height = "40px";
+      button1.color = "white";
+      button1.cornerRadius = 20;
+      button1.background = "green";
+      button1.onPointerUpObservable.add(function () {
+        if (clickedBox == null) {
+          alert("Please select box");
+        }
+        switch (clickedBox.metadata.id) {
+          case 1:
+            box1.material = boxPickedDarkGreen;
+            break;
+          case 2:
+            box2.material = boxPickedDarkGreen;
+            break;
+          case 3:
+            box3.material = boxPickedDarkGreen;
+            break;
+          case 4:
+            box4.material = boxPickedDarkGreen;
+            break;
+          case null:
+            alert("Please select box");
+            break;
+        }
+      });
+      advancedTexture.addControl(button1);
+      button1.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+
       worldBuild(ground, groundShape, this.scene);
     });
 
