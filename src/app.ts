@@ -21,13 +21,17 @@ import {
   PointerDragBehavior,
   SixDofDragBehavior,
   PhysicsPrestepType,
+  PointerEventTypes,
+  ActionManager,
+  ExecuteCodeAction,
 } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { PhysicsBody } from "@babylonjs/core";
-import { Inspector } from '@babylonjs/inspector';
-
+import { Inspector } from "@babylonjs/inspector";
+import * as GUI from "@babylonjs/gui";
+import * as BABYLON from "@babylonjs/core";
 class App {
-  scene: Scene; 
+  scene: Scene;
   constructor() {
     var canvas = document.createElement("canvas");
     canvas.style.width = "100%";
@@ -99,6 +103,7 @@ class App {
       box2.position = new Vector3(1, 2, 0);
       box3.position = new Vector3(2, 1, 0);
       box4.position = new Vector3(3, 1, 0);
+
       let boxMaterialLightGreen = new StandardMaterial("material", this.scene);
       boxMaterialLightGreen.emissiveColor = new Color3(0.1, 0.8, 0);
       let boxMaterialDarkGreen = new StandardMaterial("material", this.scene);
@@ -112,7 +117,7 @@ class App {
       const box2Body = createPhysicBox(box2, this.scene);
       const box3Body = createPhysicBox(box3, this.scene);
       const box4Body = createPhysicBox(box4, this.scene);
-      
+
       const constraint = new DistanceConstraint(
         1.15, // max distance between the two bodies
         this.scene
@@ -121,7 +126,6 @@ class App {
       box1Body.addConstraint(box2Body, constraint);
       box2Body.addConstraint(box3Body, constraint);
       box3Body.addConstraint(box4Body, constraint);
-
 
       var groundShape = new PhysicsShapeBox(
         new Vector3(0, 0, 0),
@@ -132,9 +136,9 @@ class App {
       var pointerDragBehavior = new PointerDragBehavior({
         dragAxis: new Vector3(1, 0, 0),
       });
-      
+
       pointerDragBehavior.useObjectOrientationForDragging = false;
-      
+
       pointerDragBehavior.onDragStartObservable.add((event) => {
         console.log("dragStart");
         console.log(event);
@@ -147,16 +151,70 @@ class App {
         console.log("dragEnd");
         console.log(event);
       });
-      box4Body.setPrestepType(PhysicsPrestepType.ACTION)
-      box4.addBehavior(pointerDragBehavior);
-   
+
+      let clickedBox;
+      this.scene.onPointerObservable.add((pointerInfo) => {
+        switch (pointerInfo.pickInfo.pickedMesh) {
+          case box4:
+            removeBoxPrestepAndBehavior(
+              box2Body,
+              box2,
+              box3Body,
+              box3,
+              box1Body,
+              box1,
+              pointerDragBehavior
+            );
+            addBoxPrestepAndBehavior(box4Body, box4, pointerDragBehavior);
+            console.log("clikced", pointerInfo.pickInfo.pickedMesh);
+            break;
+          case box3:
+            removeBoxPrestepAndBehavior(
+              box4Body,
+              box4,
+              box2Body,
+              box2,
+              box1Body,
+              box1,
+              pointerDragBehavior
+            );
+            addBoxPrestepAndBehavior(box3Body, box3, pointerDragBehavior);
+            console.log("clikced", pointerInfo.pickInfo.pickedMesh);
+            break;
+          case box2:
+            removeBoxPrestepAndBehavior(
+              box4Body,
+              box4,
+              box3Body,
+              box3,
+              box1Body,
+              box1,
+              pointerDragBehavior
+            );
+            addBoxPrestepAndBehavior(box2Body, box2, pointerDragBehavior);
+            console.log("clikced", pointerInfo.pickInfo.pickedMesh);
+            break;
+          case box1:
+            removeBoxPrestepAndBehavior(
+              box4Body,
+              box4,
+              box3Body,
+              box3,
+              box2Body,
+              box2,
+              pointerDragBehavior
+            );
+            addBoxPrestepAndBehavior(box1Body, box1, pointerDragBehavior);
+            console.log("clikced", pointerInfo.pickInfo.pickedMesh);
+            break;
+        }
+      });
       worldBuild(ground, groundShape, this.scene);
     });
 
     engine.runRenderLoop(() => {
       this.scene.render();
     });
-
   }
 
   async enablePhysic(): Promise<void> {
@@ -166,17 +224,36 @@ class App {
       new HavokPlugin(true, havok)
     );
   }
-  
 }
 
 new App();
-const createPhysicBox = function (box, scene){
-  const boxBody = new PhysicsBody(
-    box,
-    PhysicsMotionType.DYNAMIC,
-    false,
-    scene
-  );
+
+const addBoxPrestepAndBehavior = function (
+  currentBoxBody,
+  currentBox,
+  pointerDragBehavior
+) {
+  currentBoxBody.setPrestepType(PhysicsPrestepType.ACTION);
+  currentBox.addBehavior(pointerDragBehavior);
+};
+const removeBoxPrestepAndBehavior = function (
+  currentBox1Body,
+  currentBox1,
+  currentBox2Body,
+  currentBox2,
+  currentBox3Body,
+  currentBox3,
+  pointerDragBehavior
+) {
+  currentBox1Body.setPrestepType(PhysicsPrestepType.DISABLED);
+  currentBox1.removeBehavior(pointerDragBehavior);
+  currentBox2Body.setPrestepType(PhysicsPrestepType.DISABLED);
+  currentBox2.removeBehavior(pointerDragBehavior);
+  currentBox3Body.setPrestepType(PhysicsPrestepType.DISABLED);
+  currentBox3.removeBehavior(pointerDragBehavior);
+};
+const createPhysicBox = function (box, scene) {
+  const boxBody = new PhysicsBody(box, PhysicsMotionType.DYNAMIC, false, scene);
   var boxShape = new PhysicsShapeBox(
     new Vector3(0, 0, 0),
     Quaternion.Identity(),
@@ -193,7 +270,7 @@ const createPhysicBox = function (box, scene){
   boxShape.material = boxMaterial;
   boxBody.shape = boxShape;
   return boxBody;
-}
+};
 const worldBuild = function (ground, groundShape, scene) {
   var groundBody = new PhysicsBody(
     ground,
