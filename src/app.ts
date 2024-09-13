@@ -108,8 +108,10 @@ class App {
       boxMaterialLightGreen.emissiveColor = new Color3(0.1, 0.8, 0);
       let boxMaterialDarkGreen = new StandardMaterial("material", this.scene);
       boxMaterialDarkGreen.emissiveColor = new Color3(0.2, 0.48, 0.32);
-      let boxPickedDarkGreen = new StandardMaterial("material", this.scene);
-      boxPickedDarkGreen.emissiveColor = new Color3(1, 0, 0);
+      let boxPickedRed = new StandardMaterial("material", this.scene);
+      boxPickedRed.emissiveColor = new Color3(1, 0, 0);
+      let boxPickedDarkBlue = new StandardMaterial("material", this.scene);
+      boxPickedDarkBlue.emissiveColor = new Color3(0, 0, 1);
       box1.material = boxMaterialLightGreen;
       box2.material = boxMaterialDarkGreen;
       box3.material = boxMaterialLightGreen;
@@ -227,22 +229,23 @@ class App {
 
       var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
       let colorButton = createBox(1, "right")
+      
       colorButton.onPointerUpObservable.add(function () {
         if (clickedBox == null) {
           alert("Please select box");
         }
         switch (clickedBox.metadata.id) {
           case 1:
-            box1.material = boxPickedDarkGreen;
+            box1.material = boxPickedRed;
             break;
           case 2:
-            box2.material = boxPickedDarkGreen;
+            box2.material = boxPickedRed;
             break;
           case 3:
-            box3.material = boxPickedDarkGreen;
+            box3.material = boxPickedRed;
             break;
           case 4:
-            box4.material = boxPickedDarkGreen;
+            box4.material = boxPickedRed;
             break;
           case null:
             alert("Please select box");
@@ -251,6 +254,32 @@ class App {
       });
 
       advancedTexture.addControl(colorButton);
+
+      let color2Button = createBox(1, "left")
+      color2Button.onPointerUpObservable.add(function () {
+        if (clickedBox == null) {
+          alert("Please select box");
+        }
+        switch (clickedBox.metadata.id) {
+          case 1:
+            box1.material = boxPickedDarkBlue;
+            break;
+          case 2:
+            box2.material = boxPickedDarkBlue;
+            break;
+          case 3:
+            box3.material = boxPickedDarkBlue;
+            break;
+          case 4:
+            box4.material = boxPickedDarkBlue;
+            break;
+          case null:
+            alert("Please select box");
+            break;
+        }
+      });
+
+      advancedTexture.addControl(color2Button);
 
       var textblock = new GUI.TextBlock();
       textblock.height = "150px";
@@ -286,7 +315,7 @@ const createBox = function (id, allignment) {
   colorButton.background = "green";
   switch (allignment) {
     case "left":
-      colorButton.verticalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+      colorButton.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
       break;
     case "right":
       colorButton.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
